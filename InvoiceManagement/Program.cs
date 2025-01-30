@@ -8,6 +8,7 @@ using Invoice_Management.Models;
 using InvoiceManagement.Interface;
 using InvoiceManagement.Controllers;
 using InvoiceManagement.Services;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,26 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
+
+builder.Services.AddSwaggerGen(c =>
+{
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Description = "Authorization header using bearer schema. Please enter your token",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+    };
+    c.AddSecurityDefinition("Bearer", securityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                { securityScheme, Array.Empty<string>() }
+            });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "InventoryManagement_Endpoint", Version = "v1" });
+});
+
 
 
 builder.Services.AddControllers();
